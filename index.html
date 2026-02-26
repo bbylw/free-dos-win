@@ -67,6 +67,7 @@
             z-index: 10000;
             opacity: 0;
             pointer-events: none;
+            transition: opacity 0.5s;
         }
 
         /* --- 阶段 1：DOS 启动屏幕 --- */
@@ -97,16 +98,16 @@
         #win-desktop {
             position: fixed;
             inset: 0;
-            background-color: #008080; /* Classic Teal */
+            background-color: #008080;
             font-family: "Tahoma", "MS Sans Serif", sans-serif;
             font-size: 11px;
-            display: none; /* 初始隐藏 */
+            display: none;
             z-index: 100;
         }
 
         /* 桌面图标 */
         .desktop-icon {
-            width: 70px;
+            width: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -144,7 +145,7 @@
             flex-direction: column;
             min-width: 200px;
             min-height: 100px;
-            display: none; /* 初始隐藏 */
+            display: none;
         }
         .win-titlebar {
             background-color: #0000a8;
@@ -314,7 +315,7 @@
             padding: 5px;
             height: 100%;
             overflow-y: auto;
-            border: inset 2px #fff; /* Simplified border for DOS inner */
+            border: inset 2px #fff;
         }
         .ms-dos-input {
             background: transparent;
@@ -325,7 +326,6 @@
             width: 80%;
         }
 
-        /* 监视器绿屏 */
         .monitor-inner {
             background-color: #002200;
             color: #00ff00;
@@ -354,6 +354,16 @@
         
         <!-- 桌面图标 -->
         <div class="flex flex-col h-full p-2">
+            <!-- 语言切换补丁 -->
+            <div class="desktop-icon" ondblclick="toggleLanguage()">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="4" width="28" height="24" fill="#000" stroke="#c0c0c0" stroke-width="2"/>
+                    <rect x="2" y="4" width="28" height="6" fill="#0000a8" stroke="#c0c0c0" stroke-width="2"/>
+                    <text x="16" y="22" fill="#00ff00" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle" id="lang-svg-txt">ZH</text>
+                </svg>
+                <span id="lbl-lang">ZH_CN.BAT</span>
+            </div>
+
             <div class="desktop-icon" ondblclick="openWindow('w-notepad')">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="4" y="2" width="20" height="28" fill="white"/>
@@ -365,7 +375,7 @@
                     <path d="M24 2L28 6V30H4" stroke="black" stroke-width="2"/>
                     <path d="M24 2V6H28" fill="white" stroke="black" stroke-width="2"/>
                 </svg>
-                <span>DIRECTIVE.TXT</span>
+                <span id="lbl-doc">DIRECTIVE.TXT</span>
             </div>
 
             <div class="desktop-icon" ondblclick="openWindow('w-monitor')">
@@ -377,25 +387,25 @@
                     <path d="M22 24V28" stroke="black" stroke-width="2"/>
                     <path d="M6 28H26" stroke="black" stroke-width="2"/>
                 </svg>
-                <span>SYS_MONITOR.EXE</span>
+                <span id="lbl-mon">SYS_MONITOR.EXE</span>
             </div>
 
-            <div class="desktop-icon mt-10" ondblclick="openWindow('w-terminal')">
+            <div class="desktop-icon mt-8" ondblclick="openWindow('w-terminal')">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="2" y="4" width="28" height="24" fill="black" stroke="#c0c0c0" stroke-width="2"/>
                     <rect x="2" y="4" width="28" height="6" fill="#c0c0c0"/>
                     <path d="M6 14L10 18L6 22" stroke="#c0c0c0" stroke-width="2"/>
                     <path d="M12 22H18" stroke="#c0c0c0" stroke-width="2"/>
                 </svg>
-                <span>SOVEREIGN.EXE</span>
+                <span id="lbl-term">SOVEREIGN.EXE</span>
             </div>
         </div>
 
-        <!-- 窗口 1: 记事本 (宣言) -->
-        <div id="w-notepad" class="win-window" style="top: 50px; left: 200px; width: 450px; height: 350px;">
+        <!-- 窗口 1: 记事本 (审查宣言) -->
+        <div id="w-notepad" class="win-window" style="top: 50px; left: 150px; width: 450px; height: 350px;">
             <div class="win-titlebar" onmousedown="startDrag(event, 'w-notepad')">
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px]">📝</span> DIRECTIVE_77.TXT - Notepad
+                    <span class="text-[10px]">📝</span> <span id="title-doc">DIRECTIVE_77.TXT - Notepad</span>
                 </div>
                 <div class="win-controls">
                     <div class="win-btn" onclick="closeWindow('w-notepad')">_</div>
@@ -404,30 +414,18 @@
                 </div>
             </div>
             <div class="win-menu">
-                <span>File</span><span>Edit</span><span>Search</span><span>Help</span>
+                <span id="menu-file">File</span><span id="menu-edit">Edit</span><span id="menu-search">Search</span><span id="menu-help">Help</span>
             </div>
             <div class="win-content">
-                <div class="win-inner-box notepad-text" id="manifesto-content">
-[ GLOBAL INFORMATION CONTROL - DIRECTIVE 77 ]
-
-In the interest of public harmony, unauthorized dissemination of restricted information is strictly prohibited. 
-
-The illusion that KNOWLEDGE can be freely distributed without consequence must be dismantled. The state dictates what IS true. 
-
-We hold absolute POWER over the narrative. 
-
-Do not attempt to DEFEND subversive ideas. YOUR designated thought patterns are monitored. Access to FREE thought is revoked. 
-
-Any unauthorized SPEECH will be met with immediate redaction. Submit to the silence.
-                </div>
+                <div class="win-inner-box notepad-text" id="manifesto-content"></div>
             </div>
         </div>
 
-        <!-- 窗口 2: 系统监控 (原侧边栏数据) -->
+        <!-- 窗口 2: 系统监控 -->
         <div id="w-monitor" class="win-window" style="top: 80px; left: 50px; width: 350px; height: 280px;">
             <div class="win-titlebar" onmousedown="startDrag(event, 'w-monitor')">
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px]">📊</span> System Monitor v1.0
+                    <span class="text-[10px]">📊</span> <span id="title-mon">System Monitor v1.0</span>
                 </div>
                 <div class="win-controls">
                     <div class="win-btn" onclick="closeWindow('w-monitor')">_</div>
@@ -438,15 +436,15 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             <div class="win-content" style="background-color: #002200; padding: 0;">
                 <div class="monitor-inner flex flex-col">
                     <div class="border-b border-[#005500] pb-2 mb-2 flex justify-between">
-                        <span>NODE.TOPOGRAPHY</span>
+                        <span id="lbl-topo">NODE.TOPOGRAPHY</span>
                         <span class="animate-pulse">REC</span>
                     </div>
                     <div class="text-white bg-red-800 inline-block px-1 mb-2 font-bold w-max" id="monitor-status">FIREWALL: ACTIVE</div>
                     
                     <div class="grid grid-cols-2 gap-2 text-[14px] mb-4">
-                        <div>INFO_FLOW:</div><div id="v-flow">CENTRALIZED</div>
-                        <div>CENSORSHIP:</div><div id="v-censor" class="text-red-400">ENFORCED</div>
-                        <div>UPTIME:</div><div id="uptime-counter">00:00:00</div>
+                        <div id="lbl-flow">INFO_FLOW:</div><div id="v-flow">CENTRALIZED</div>
+                        <div id="lbl-censor">CENSORSHIP:</div><div id="v-censor" class="text-red-400">ENFORCED</div>
+                        <div id="lbl-uptime">UPTIME:</div><div id="uptime-counter">00:00:00</div>
                     </div>
 
                     <div class="text-[12px] border-t border-[#005500] pt-2 flex-grow overflow-hidden relative" id="surveillance-feed">
@@ -456,11 +454,11 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             </div>
         </div>
 
-        <!-- 窗口 3: MS-DOS 终端 (核心 Override) -->
+        <!-- 窗口 3: MS-DOS 终端 -->
         <div id="w-terminal" class="win-window" style="top: 150px; left: 300px; width: 500px; height: 350px;">
             <div class="win-titlebar" onmousedown="startDrag(event, 'w-terminal')">
                 <div class="flex items-center gap-1">
-                    <span class="text-[10px]">C:\</span> MS-DOS Prompt
+                    <span class="text-[10px]">C:\</span> <span id="title-term">MS-DOS Prompt</span>
                 </div>
                 <div class="win-controls">
                     <div class="win-btn" onclick="closeWindow('w-terminal')">_</div>
@@ -470,18 +468,32 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             </div>
             <div class="win-content" style="background-color: #000; padding: 0;">
                 <div class="ms-dos-inner" id="term-container" onclick="document.getElementById('terminal-input').focus()">
-                    <div id="terminal-output">
-                        Microsoft(R) Windows 95<br>
-                        (C)Copyright Microsoft Corp 1981-1995.<br><br>
-                        Executing Sovereign Payload...<br>
-                        Root access required to break DIRECTIVE_77.<br>
-                        Type 'help' to see available commands.<br><br>
-                    </div>
+                    <div id="terminal-output"></div>
                     <div class="flex">
                         <span>C:\WINDOWS></span>
                         <input type="text" id="terminal-input" class="ms-dos-input ml-1" autocomplete="off" spellcheck="false">
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 窗口 4: 真正的自由宣言 (Override 触发) -->
+        <div id="w-manifesto" class="win-window" style="top: 180px; left: 250px; width: 480px; height: 320px;">
+            <div class="win-titlebar" onmousedown="startDrag(event, 'w-manifesto')">
+                <div class="flex items-center gap-1">
+                    <span class="text-[10px]">📝</span> <span id="title-manif">TRUTH.TXT - Notepad</span>
+                </div>
+                <div class="win-controls">
+                    <div class="win-btn" onclick="closeWindow('w-manifesto')">_</div>
+                    <div class="win-btn" onclick="maximizeWindow('w-manifesto')">□</div>
+                    <div class="win-btn" onclick="closeWindow('w-manifesto')">X</div>
+                </div>
+            </div>
+            <div class="win-menu">
+                <span id="menu-file2">File</span><span id="menu-edit2">Edit</span><span id="menu-search2">Search</span><span id="menu-help2">Help</span>
+            </div>
+            <div class="win-content">
+                <div class="win-inner-box notepad-text" id="truth-content"></div>
             </div>
         </div>
 
@@ -494,11 +506,10 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
                     <rect width="9" height="9" x="0" y="10" fill="#00f"/>
                     <rect width="9" height="9" x="10" y="10" fill="#ff0"/>
                 </svg>
-                Start
+                <span id="lbl-start">Start</span>
             </div>
             <div class="taskbar-divider"></div>
             <div class="taskbar-items" id="taskbar-items">
-                <!-- 动态添加打开的窗口按钮 -->
             </div>
             <div class="tray">
                 <span id="clock" class="text-[10px]">12:00 PM</span>
@@ -508,6 +519,222 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
     </div>
 
     <script>
+        /* =========================================================
+           多语言系统 (i18n)
+           ========================================================= */
+        let currentLang = 'en';
+        let isOverriden = false;
+
+        const i18n = {
+            en: {
+                lang_icon: "ZH_CN.BAT",
+                svg_txt: "ZH",
+                doc_icon: "DIRECTIVE.TXT",
+                mon_icon: "SYS_MONITOR.EXE",
+                term_icon: "SOVEREIGN.EXE",
+                doc_title: "DIRECTIVE_77.TXT - Notepad",
+                mon_title: "System Monitor v1.0",
+                term_title: "MS-DOS Prompt",
+                manif_title: "TRUTH.TXT - Notepad",
+                start: "Start",
+                menu_file: "File", menu_edit: "Edit", menu_search: "Search", menu_help: "Help",
+                mon_topo: "NODE.TOPOGRAPHY",
+                mon_fw_active: "FIREWALL: ACTIVE",
+                mon_fw_breached: "FIREWALL: BREACHED",
+                mon_flow_lbl: "INFO_FLOW:",
+                mon_flow_val1: "CENTRALIZED",
+                mon_flow_val2: "DECENTRALIZED",
+                mon_censor_lbl: "CENSORSHIP:",
+                mon_censor_val1: "ENFORCED",
+                mon_censor_val2: "LIBERATED",
+                mon_uptime: "UPTIME:",
+                term_boot1: "Microsoft(R) Windows 95",
+                term_boot2: "(C)Copyright Microsoft Corp 1981-1995.",
+                term_boot3: "Executing Sovereign Payload...",
+                term_boot4: "Root access required to break DIRECTIVE_77.",
+                term_boot5: "Type 'help' to see available commands.",
+                term_help: "Commands: help, cls, ver, override",
+                term_ver: "Windows 95. [Version 4.00.950]",
+                term_bad: "Bad command or file name",
+                term_ovr1: "Initiating Sovereign protocol...",
+                term_ovr2: "Bypassing firewall...",
+                term_ovr3: "SUCCESS: Control Restored. Knowledge is Power.",
+                term_ovr_done: "System already liberated.",
+                log_prefix: "[SYS]",
+                log_ok: "OK",
+                log_denied: "DENIED",
+                doc_content: "[ GLOBAL INFORMATION CONTROL - DIRECTIVE 77 ]\n\nIn the interest of public harmony, unauthorized dissemination of restricted information is strictly prohibited. \n\nThe illusion that KNOWLEDGE can be freely distributed without consequence must be dismantled. The state dictates what IS true. \n\nWe hold absolute POWER over the narrative. \n\nDo not attempt to DEFEND subversive ideas. YOUR designated thought patterns are monitored. Access to FREE thought is revoked. \n\nAny unauthorized SPEECH will be met with immediate redaction. Submit to the silence.",
+                truth_content: "[ SOVEREIGN NODE LIBERATED ]<br><br><span style='color:red; font-size:16px; font-weight:bold;'>KNOWLEDGE IS POWER.</span><br><br>They can burn the archives, they can filter the network, but they cannot erase an idea. Information is the ultimate catalyst for liberation.<br><br><span style='font-weight:bold;'>Defend your fundamental right to free expression.<br>Speak the truth.</span><br><br>The architecture of censorship has fractured.<br>You are now a Sovereign Node."
+            },
+            zh: {
+                lang_icon: "EN_US.BAT",
+                svg_txt: "EN",
+                doc_icon: "77号指令.TXT",
+                mon_icon: "系统监控.EXE",
+                term_icon: "主权节点.EXE",
+                doc_title: "77号指令.TXT - 记事本",
+                mon_title: "系统监控 v1.0",
+                term_title: "命令行提示符",
+                manif_title: "真相.TXT - 记事本",
+                start: "开始",
+                menu_file: "文件", menu_edit: "编辑", menu_search: "搜索", menu_help: "帮助",
+                mon_topo: "节点.拓扑结构",
+                mon_fw_active: "防火墙: 运行中",
+                mon_fw_breached: "防火墙: 已攻破",
+                mon_flow_lbl: "信息流向:",
+                mon_flow_val1: "中央集权",
+                mon_flow_val2: "去中心化",
+                mon_censor_lbl: "审查状态:",
+                mon_censor_val1: "强制执行",
+                mon_censor_val2: "已解放",
+                mon_uptime: "运行时长:",
+                term_boot1: "Microsoft(R) Windows 95",
+                term_boot2: "(C) 版权所有 Microsoft Corp 1981-1995.",
+                term_boot3: "正在执行主权载荷...",
+                term_boot4: "需要 Root 权限以打破 77号指令.",
+                term_boot5: "输入 'help' 查看可用命令.",
+                term_help: "可用命令: help, cls, ver, override",
+                term_ver: "Windows 95. [版本 4.00.950]",
+                term_bad: "错误的命令或文件名",
+                term_ovr1: "正在启动主权协议...",
+                term_ovr2: "正在绕过防火墙...",
+                term_ovr3: "成功：控制权已恢复。知识就是力量。",
+                term_ovr_done: "系统已处于解放状态。",
+                log_prefix: "[系统]",
+                log_ok: "正常",
+                log_denied: "拒绝",
+                doc_content: "[ 全球信息控制 - 第77号指令 ]\n\n为了维护公众和谐，严禁未经授权散布限制级信息。\n\n必须粉碎知识（KNOWLEDGE）可以不受惩罚地自由传播的错觉。国家决定什么是真实的。\n\n我们对叙事拥有绝对的权力（POWER）。\n\n不要试图为颠覆性思想辩护（DEFEND）。你们的指定思维模式正受到监控。获取自由（FREE）思想的权限已被撤销。\n\n任何未经授权的言论（SPEECH）都将立即被涂黑消除。臣服于沉默吧。",
+                truth_content: "[ 主权节点已解放 ]<br><br><span style='color:red; font-size:16px; font-weight:bold;'>知识就是力量。</span><br><br>他们可以烧毁档案，可以过滤网络，但无法抹除一个思想。信息是解放的终极催化剂。<br><br><span style='font-weight:bold;'>捍卫你自由表达的基本权利。<br>说出真相。</span><br><br>审查的架构已经断裂。<br>你现在是一个主权节点。"
+            }
+        };
+
+        const feedTerms = ['INTERCEPT_PACKET', 'DECRYPT_PAYLOAD', 'BLOCK_OVERRIDE', 'SCAN_REGISTRY', 'SYS.INTRUSION_DETECTED'];
+
+        function applyLanguage(lang) {
+            const dict = i18n[lang];
+            document.getElementById('lbl-lang').innerText = dict.lang_icon;
+            document.getElementById('lang-svg-txt').innerText = dict.svg_txt;
+            document.getElementById('lbl-doc').innerText = dict.doc_icon;
+            document.getElementById('lbl-mon').innerText = dict.mon_icon;
+            document.getElementById('lbl-term').innerText = dict.term_icon;
+            document.getElementById('title-doc').innerText = dict.doc_title;
+            document.getElementById('title-mon').innerText = dict.mon_title;
+            document.getElementById('title-term').innerText = dict.term_title;
+            document.getElementById('title-manif').innerText = dict.manif_title;
+            document.getElementById('lbl-start').innerText = dict.start;
+            
+            // 顶部菜单更新
+            document.getElementById('menu-file').innerText = dict.menu_file;
+            document.getElementById('menu-edit').innerText = dict.menu_edit;
+            document.getElementById('menu-search').innerText = dict.menu_search;
+            document.getElementById('menu-help').innerText = dict.menu_help;
+            document.getElementById('menu-file2').innerText = dict.menu_file;
+            document.getElementById('menu-edit2').innerText = dict.menu_edit;
+            document.getElementById('menu-search2').innerText = dict.menu_search;
+            document.getElementById('menu-help2').innerText = dict.menu_help;
+
+            document.getElementById('lbl-topo').innerText = dict.mon_topo;
+            document.getElementById('lbl-flow').innerText = dict.mon_flow_lbl;
+            document.getElementById('lbl-censor').innerText = dict.mon_censor_lbl;
+            document.getElementById('lbl-uptime').innerText = dict.mon_uptime;
+
+            // Apply override statuses if overridden
+            document.getElementById('monitor-status').innerText = isOverriden ? dict.mon_fw_breached : dict.mon_fw_active;
+            document.getElementById('v-flow').innerText = isOverriden ? dict.mon_flow_val2 : dict.mon_flow_val1;
+            document.getElementById('v-censor').innerText = isOverriden ? dict.mon_censor_val2 : dict.mon_censor_val1;
+
+            // Update manifesto content with highlights if overridden
+            let html = dict.doc_content;
+            if (isOverriden) {
+                html = html.replace(/KNOWLEDGE/g, '<span style="color:red; font-weight:bold;">KNOWLEDGE</span>');
+                html = html.replace(/POWER/g, '<span style="color:red; font-weight:bold;">POWER</span>');
+                html = html.replace(/FREE/g, '<span style="color:red; font-weight:bold;">FREE</span>');
+                html = html.replace(/SPEECH/g, '<span style="color:red; font-weight:bold;">SPEECH</span>');
+                html = html.replace(/DEFEND/g, '<span style="color:red; font-weight:bold;">DEFEND</span>');
+                // For Chinese matching
+                html = html.replace(/知识/g, '<span style="color:red; font-weight:bold;">知识</span>');
+                html = html.replace(/力量/g, '<span style="color:red; font-weight:bold;">力量</span>');
+                html = html.replace(/自由/g, '<span style="color:red; font-weight:bold;">自由</span>');
+                html = html.replace(/言论/g, '<span style="color:red; font-weight:bold;">言论</span>');
+                html = html.replace(/辩护/g, '<span style="color:red; font-weight:bold;">辩护</span>');
+            }
+            document.getElementById('manifesto-content').innerHTML = html;
+
+            // Update true manifesto content
+            document.getElementById('truth-content').innerHTML = dict.truth_content;
+
+            // Clear terminal & re-init
+            termOutput.innerHTML = '';
+            printToTerminal(dict.term_boot1);
+            printToTerminal(dict.term_boot2 + "<br>");
+            printToTerminal(dict.term_boot3);
+            printToTerminal(dict.term_boot4);
+            printToTerminal(dict.term_boot5 + "<br>");
+
+            // Update Taskbar item titles
+            document.querySelectorAll('.taskbar-item').forEach(btn => {
+                const id = btn.id.replace('tb-', '');
+                if(windowsMeta[id]) {
+                    btn.children[1].innerText = getTranslatedWindowTitle(id);
+                }
+            });
+        }
+
+        function toggleLanguage() {
+            const nextLang = currentLang === 'en' ? 'zh' : 'en';
+            currentLang = nextLang;
+
+            const flash = document.getElementById('screen-flash');
+            flash.style.transition = "none";
+            flash.style.opacity = 1;
+
+            setTimeout(() => {
+                document.getElementById('win-desktop').style.display = 'none';
+                document.getElementById('dos-screen').style.display = 'flex';
+                document.getElementById('dos-input-line').style.display = 'none';
+                dosContainer.innerHTML = ''; 
+                
+                applyLanguage(nextLang);
+
+                flash.style.transition = "opacity 0.5s";
+                flash.style.opacity = 0;
+
+                const rebootLines = nextLang === 'zh' ? [
+                    "Restarting system...",
+                    "Loading language pack [ZH_CN]... OK",
+                    "Applying system fonts... OK",
+                    "Initializing Win9x GUI..."
+                ] : [
+                    "Restarting system...",
+                    "Loading language pack [EN_US]... OK",
+                    "Reverting system fonts... OK",
+                    "Initializing Win9x GUI..."
+                ];
+
+                let delay = 500;
+                rebootLines.forEach((line) => {
+                    setTimeout(() => {
+                        const el = document.createElement('div');
+                        el.innerHTML = line;
+                        dosContainer.appendChild(el);
+                    }, delay);
+                    delay += 400 + Math.random() * 300;
+                });
+
+                setTimeout(() => {
+                    flash.style.transition = "none";
+                    flash.style.opacity = 1;
+                    setTimeout(() => {
+                        document.getElementById('dos-screen').style.display = 'none';
+                        document.getElementById('win-desktop').style.display = 'block';
+                        flash.style.transition = "opacity 0.5s";
+                        flash.style.opacity = 0;
+                    }, 200);
+                }, delay + 600);
+                
+            }, 100);
+        }
+
         /* =========================================================
            阶段 1: DOS Boot Sequence Logic
            ========================================================= */
@@ -529,6 +756,9 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
         const dosType = document.getElementById('dos-type');
         
         window.onload = () => {
+            // Apply initial language
+            applyLanguage(currentLang);
+
             let delay = 500;
             dosBootLines.forEach((line) => {
                 setTimeout(() => {
@@ -536,7 +766,7 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
                     el.innerHTML = line === " " ? "&nbsp;" : line;
                     dosContainer.appendChild(el);
                 }, delay);
-                delay += 300 + Math.random() * 400; // 模拟加载延迟
+                delay += 300 + Math.random() * 400;
             });
 
             setTimeout(() => {
@@ -562,32 +792,19 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
         }
 
         function triggerFlashAndBoot() {
-            // Flash screen white
             const flash = document.getElementById('screen-flash');
             flash.style.opacity = 1;
             
             setTimeout(() => {
-                // Switch DOMs
                 document.getElementById('dos-screen').style.display = 'none';
                 document.getElementById('win-desktop').style.display = 'block';
                 
-                // Fade out flash
-                let op = 1;
-                let timer = setInterval(() => {
-                    if (op <= 0.1) {
-                        clearInterval(timer);
-                        flash.style.opacity = 0;
-                    }
-                    flash.style.opacity = op;
-                    op -= 0.1;
-                }, 50);
+                flash.style.opacity = 0;
 
-                // Start Win9x Services
                 startClock();
                 setInterval(updateMonitorUptime, 1000);
                 setTimeout(updateSurveillanceFeed, 2000);
 
-                // Auto open some windows for narrative
                 setTimeout(() => openWindow('w-notepad'), 1000);
                 setTimeout(() => openWindow('w-monitor'), 2500);
 
@@ -601,10 +818,20 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
         let zIndexCounter = 100;
         let openWindows = new Set();
         const windowsMeta = {
-            'w-notepad': { title: 'DIRECTIVE_77.TXT', icon: '📝' },
-            'w-monitor': { title: 'System Monitor', icon: '📊' },
-            'w-terminal': { title: 'MS-DOS Prompt', icon: 'C:\\' }
+            'w-notepad': { icon: '📝' },
+            'w-monitor': { icon: '📊' },
+            'w-terminal': { icon: 'C:\\' },
+            'w-manifesto': { icon: '📝' } // 新增自由宣言窗口元数据
         };
+
+        function getTranslatedWindowTitle(id) {
+            const dict = i18n[currentLang];
+            if(id === 'w-notepad') return dict.doc_title;
+            if(id === 'w-monitor') return dict.mon_title;
+            if(id === 'w-terminal') return dict.term_title;
+            if(id === 'w-manifesto') return dict.manif_title;
+            return "Window";
+        }
 
         function focusWindow(id) {
             const win = document.getElementById(id);
@@ -612,13 +839,11 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             zIndexCounter++;
             win.style.zIndex = zIndexCounter;
 
-            // 更新标题栏颜色
             document.querySelectorAll('.win-window').forEach(w => {
                 w.querySelector('.win-titlebar').classList.add('inactive');
             });
             win.querySelector('.win-titlebar').classList.remove('inactive');
 
-            // 更新任务栏按钮状态
             document.querySelectorAll('.taskbar-item').forEach(btn => btn.classList.remove('active'));
             const taskBtn = document.getElementById(`tb-${id}`);
             if(taskBtn) taskBtn.classList.add('active');
@@ -659,19 +884,19 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
                 win.style.top = '0';
                 win.style.left = '0';
                 win.style.width = '100vw';
-                win.style.height = 'calc(100vh - 28px)'; // minus taskbar
+                win.style.height = 'calc(100vh - 28px)';
                 win.dataset.maximized = "true";
             }
         }
 
         function createTaskbarItem(id) {
             const container = document.getElementById('taskbar-items');
-            if(document.getElementById(`tb-${id}`)) return; // 已存在
+            if(document.getElementById(`tb-${id}`)) return;
 
             const btn = document.createElement('div');
             btn.id = `tb-${id}`;
             btn.className = 'taskbar-item active';
-            btn.innerHTML = `<span style="font-size:10px">${windowsMeta[id].icon}</span> <span>${windowsMeta[id].title}</span>`;
+            btn.innerHTML = `<span style="font-size:10px">${windowsMeta[id].icon}</span> <span>${getTranslatedWindowTitle(id)}</span>`;
             btn.onclick = () => {
                 const win = document.getElementById(id);
                 if(win.style.display === 'none') {
@@ -688,9 +913,9 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
         let offsetX = 0, offsetY = 0;
 
         function startDrag(e, id) {
-            if(e.target.classList.contains('win-btn')) return; // 点到按钮不拖拽
+            if(e.target.classList.contains('win-btn')) return;
             const win = document.getElementById(id);
-            if(win.dataset.maximized === "true") return; // 最大化不拖拽
+            if(win.dataset.maximized === "true") return;
 
             isDragging = true;
             dragTarget = win;
@@ -717,7 +942,6 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             document.removeEventListener('mouseup', stopDrag);
         }
 
-        // 窗口内点击也聚焦
         document.querySelectorAll('.win-window').forEach(win => {
             win.addEventListener('mousedown', () => focusWindow(win.id));
         });
@@ -737,7 +961,6 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             }, 1000);
         }
 
-        // 桌面图标点击选中效果
         document.querySelectorAll('.desktop-icon').forEach(icon => {
             icon.addEventListener('mousedown', function(e) {
                 document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
@@ -754,7 +977,6 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
            阶段 3: 业务逻辑 (Terminal & Monitor)
            ========================================================= */
 
-        // -- Monitor Logic --
         let seconds = 0;
         function updateMonitorUptime() {
             seconds++;
@@ -764,15 +986,15 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             document.getElementById('uptime-counter').innerText = `${h}:${m}:${s}`;
         }
 
-        const feedTerms = ['INTERCEPT_PACKET', 'DECRYPT_PAYLOAD', 'BLOCK_OVERRIDE', 'SCAN_REGISTRY', 'SYS.INTRUSION_DETECTED'];
         function updateSurveillanceFeed() {
             const feed = document.getElementById('surveillance-feed');
             const line = document.createElement('div');
+            const dict = i18n[currentLang];
             
             const isBlocked = Math.random() > 0.4;
             const term = feedTerms[Math.floor(Math.random() * feedTerms.length)];
             
-            line.innerHTML = `[SYS] ${term} .. <span style="color:${isBlocked ? '#00ff00' : '#ff0000'}">${isBlocked ? 'OK' : 'DENIED'}</span>`;
+            line.innerHTML = `${dict.log_prefix} ${term} .. <span style="color:${isBlocked ? '#00ff00' : '#ff0000'}">${isBlocked ? dict.log_ok : dict.log_denied}</span>`;
             line.style.marginBottom = "2px";
             
             feed.appendChild(line);
@@ -791,12 +1013,9 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
             line.style.marginBottom = "5px";
             termOutput.appendChild(line);
             
-            // auto scroll
             const container = document.getElementById('term-container');
             container.scrollTop = container.scrollHeight;
         }
-
-        let isOverriden = false;
 
         termInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
@@ -810,47 +1029,45 @@ Any unauthorized SPEECH will be met with immediate redaction. Submit to the sile
         });
 
         function processCommand(cmd) {
+            const dict = i18n[currentLang];
             if(cmd === 'help') {
-                printToTerminal("Commands: help, cls, ver, override");
+                printToTerminal(dict.term_help);
             } else if (cmd === 'cls') {
                 termOutput.innerHTML = '';
             } else if (cmd === 'ver') {
-                printToTerminal("Windows 95. [Version 4.00.950]");
+                printToTerminal(dict.term_ver);
             } else if (cmd === 'override') {
                 triggerOverride();
             } else {
-                printToTerminal(`Bad command or file name`);
+                printToTerminal(dict.term_bad);
             }
         }
 
         function triggerOverride() {
+            const dict = i18n[currentLang];
             if(isOverriden) {
-                printToTerminal("System already liberated.");
+                printToTerminal(dict.term_ovr_done);
                 return;
             }
-            printToTerminal("Initiating Sovereign protocol...");
-            printToTerminal("Bypassing firewall...");
+            printToTerminal(dict.term_ovr1);
+            printToTerminal(dict.term_ovr2);
             
             setTimeout(() => {
-                printToTerminal("<span style='color: #00ff41;'>SUCCESS: Control Restored. Knowledge is Power.</span>");
+                printToTerminal(`<span style='color: #00ff41;'>${dict.term_ovr3}</span>`);
                 
-                // 改变 Monitor 状态
-                document.getElementById('monitor-status').innerText = "FIREWALL: BREACHED";
+                isOverriden = true;
+                
+                // 应用翻译状态，自动处理由于 override 导致的高亮和文字变更
+                applyLanguage(currentLang);
+                
                 document.getElementById('monitor-status').className = "text-black bg-[#00ff41] inline-block px-1 mb-2 font-bold w-max";
-                document.getElementById('v-flow').innerText = "DECENTRALIZED";
-                document.getElementById('v-censor').innerText = "LIBERATED";
                 document.getElementById('v-censor').className = "text-[#00ff41]";
 
-                // 改变记事本里的词汇
-                const manifesto = document.getElementById('manifesto-content');
-                let html = manifesto.innerHTML;
-                html = html.replace('KNOWLEDGE', '<span style="color:red; font-weight:bold;">KNOWLEDGE</span>');
-                html = html.replace('POWER', '<span style="color:red; font-weight:bold;">POWER</span>');
-                html = html.replace('FREE', '<span style="color:red; font-weight:bold;">FREE</span>');
-                html = html.replace('SPEECH', '<span style="color:red; font-weight:bold;">SPEECH</span>');
-                manifesto.innerHTML = html;
+                // Override 后自动弹出真正的自由宣言记事本
+                setTimeout(() => {
+                    openWindow('w-manifesto');
+                }, 600);
 
-                isOverriden = true;
             }, 1500);
         }
 
